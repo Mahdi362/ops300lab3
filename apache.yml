@@ -1,0 +1,35 @@
+---
+- name: Install and Configure Apache
+  hosts: mahdigroup
+  become: yes  
+  tasks:
+    - name: Install Apache package
+      package:
+        name: httpd
+        state: latest
+      notify: restart httpd
+    - name: Copy Apache config file
+      template:
+        src: /etc/ansible/template/conf.apache.j2
+        dest: /etc/httpd/conf/httpd.conf
+      notify: restart httpd  
+    - name: Start Apache service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: Install other packages
+      package:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - curl
+        - git
+        - python3
+  handlers:
+    - name: restart httpd
+      service:
+        name: httpd
+        state: restarted
+        
+
